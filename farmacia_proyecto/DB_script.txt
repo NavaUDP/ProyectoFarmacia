@@ -1,0 +1,101 @@
+-- Tabla miembro
+CREATE TABLE miembro (
+  rut_miembro CHAR(8) PRIMARY KEY,
+  nombre VARCHAR(15),
+  apellido VARCHAR(15),
+  correo_electronico VARCHAR(20),
+  puntos_acumulados INTEGER
+);
+
+-- Tabla trabajador
+CREATE TABLE trabajador (
+  rut_trabajador CHAR(8) PRIMARY KEY,
+  nombre VARCHAR(15),
+  apellido VARCHAR(15),
+  nombre_cuenta VARCHAR(7),
+  contraseña VARCHAR(10),
+  correo_electronico VARCHAR(20),
+  rol BOOLEAN  -- TRUE: admin, FALSE: operativo
+);
+
+-- Tabla producto
+CREATE TABLE producto (
+  codigo_producto CHAR(8) PRIMARY KEY,
+  nombre VARCHAR(15),
+  stock SMALLINT,
+  precio_venta INTEGER
+);
+
+-- Tabla venta
+CREATE TABLE venta (
+  id_venta UUID PRIMARY KEY,
+  rut_miembro CHAR(8) REFERENCES miembro(rut_miembro),
+  rut_trabajador CHAR(8) REFERENCES trabajador(rut_trabajador),
+  fecha DATE,
+  total_venta_bruto INTEGER,
+  puntos_usados INTEGER,
+  total_venta_final INTEGER
+);
+
+-- Tabla detalle_venta
+CREATE TABLE detalle_venta (
+  id_detalle UUID PRIMARY KEY,
+  id_venta UUID REFERENCES venta(id_venta),
+  codigo_producto CHAR(8) REFERENCES producto(codigo_producto),
+  cantidad SMALLINT,
+  precio_unitario INTEGER
+);
+
+-- Tabla proveedor
+CREATE TABLE proveedor (
+  rut_proveedor CHAR(8) PRIMARY KEY,
+  nombre VARCHAR(15),
+  correo_electronico VARCHAR(20)
+);
+
+-- Tabla producto_proveedor
+CREATE TABLE producto_proveedor (
+  id_producto_proveedor UUID PRIMARY KEY,
+  codigo_producto CHAR(8) REFERENCES producto(codigo_producto),
+  rut_proveedor CHAR(8) REFERENCES proveedor(rut_proveedor),
+  precio_compra INTEGER
+);
+
+-- Tabla compra
+CREATE TABLE compra (
+  id_compra UUID PRIMARY KEY,
+  fecha DATE,
+  total_compra INTEGER
+);
+
+-- Tabla detalle_compra
+CREATE TABLE detalle_compra (
+  id_detalle UUID PRIMARY KEY,
+  id_compra UUID REFERENCES compra(id_compra),
+  id_producto_proveedor UUID REFERENCES producto_proveedor(id_producto_proveedor),
+  cantidad SMALLINT,
+  precio_unitario INTEGER
+);
+
+
+
+
+INSERT INTO trabajador (
+  rut_trabajador, nombre, apellido, nombre_cuenta, contraseña, correo_electronico, rol
+) VALUES (
+  '12345678', 'ADMIN', 'ADMIN', 'admin', 'pass1', 'admin@empresa.cl', TRUE
+);
+
+-- Operativo
+INSERT INTO trabajador (
+  rut_trabajador, nombre, apellido, nombre_cuenta, contraseña, correo_electronico, rol
+) VALUES (
+  '87654321', 'operativo', 'operativo', 'opera', 'pass2', 'operativo@empresa.cl', FALSE
+);
+
+INSERT INTO producto (
+  codigo_producto, nombre, stock, precio_venta
+) VALUES 
+  ('PROD0001', 'Menta', 100, 1200),
+  ('PROD0002', 'Crema', 50, 900),
+  ('PROD0003', 'Vitaminas', 200, 1500);
