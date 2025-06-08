@@ -4,10 +4,6 @@ import json
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
-# -------------------------
-# LÓGICA SOBRE BD
-# -------------------------
-
 class MiembroServiceDB:
     def __init__(self):
         # Conectar a la BD 'farmacia' en el contenedor Docker (puerto 5433)
