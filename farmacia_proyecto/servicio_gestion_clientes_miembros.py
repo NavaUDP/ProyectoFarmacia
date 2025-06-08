@@ -6,15 +6,15 @@ from psycopg2.extras import RealDictCursor
 
 class MiembroServiceDB:
     def __init__(self):
-        # Conectar a la BD 'farmacia' en el contenedor Docker (puerto 5433)
+        
         self.conn = psycopg2.connect(
             dbname="farmacia",
             user="", # Poner nombre
             password="", # Poner contraseña
             host="localhost",
-                                # Poner puerto
+                                # Poner puerto (port=PUERTO)
         )
-        # Usamos RealDictCursor para obtener filas como dict
+        # Usar RealDictCursor para obtener filas como dict
         self.conn.autocommit = True
 
     def listar(self):
