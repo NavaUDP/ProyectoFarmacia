@@ -3,6 +3,7 @@ import ast
 import os
 import platform
 import sys
+import json
 
 nombre_usuario = ""
 
@@ -16,7 +17,7 @@ def limpiar_consola():
     comando = 'cls' if platform.system() == 'Windows' else 'clear'
     os.system(comando)
 
-#Función para comunicarse con el bus
+# Función para comunicarse con el bus
 def com_bus(mensaje):
     size = f"{len(mensaje):05}".encode()
     sock.sendall(size + mensaje)
@@ -38,43 +39,131 @@ def com_bus(mensaje):
 def gestion_clientes_miembros():
     prefijo = b"serv8"
     while True:
-        print("\nOpciones:")
-        print("1. Agregar cliente miembro")
-        print("2. Eliminar cliente miembro")
-        print("3. Volver al menú")
-
+        print("\nGestión de Clientes Miembros:")
+        print("  1) Listar clientes miembros")
+        print("  2) Agregar cliente miembro")
+        print("  3) Eliminar cliente miembro")
+        print("  4) Volver al menú")
         opcion = input("Seleccione una opción: ")
-        if opcion == "3":
+
+        if opcion == "4":
             print("Volviendo al menú...\n")
             break
-        elif opcion == "1":
-            print(f"Ejecutando función {opcion} (sin acción por ahora).")
+
+        # 1) LISTAR
+        if opcion == "1":
+            mensaje = prefijo + b"LIST"
+            contenido = com_bus(mensaje)   # e.g. "OK[...json...]"
+            if contenido.startswith("OK"):
+                cuerpo = contenido[2:]
+                try:
+                    lista = json.loads(cuerpo)
+                    print("\nRUT     │ Nombre      │ Apellido    │ Correo               │ Puntos")
+                    print("─────────┼──────────────┼─────────────┼──────────────────────┼────────")
+                    for m in lista:
+                        print(f"{m['rut']} ┃ {m['nombre']:<12} ┃ {m['apellido']:<11} ┃ "
+                              f"{m['correo']:<20} ┃ {m['puntos']}")
+                except json.JSONDecodeError:
+                    print("Error al decodificar JSON:", cuerpo)
+            else:
+                print("Error al listar:", contenido)
+
+        # 2) AGREGAR
         elif opcion == "2":
-            print(f"Ejecutando función {opcion} (sin acción por ahora).")
+            rut     = input("RUT (8 dígitos): ")
+            nombre  = input("Nombre: ")
+            apellido= input("Apellido: ")
+            correo  = input("Correo electrónico: ")
+            datos   = f"ADD|{rut}|{nombre}|{apellido}|{correo}".encode()
+            contenido = com_bus(prefijo + datos)   # e.g. "OK" or "NK..."
+            if contenido.startswith("OK"):
+                print("Cliente miembro agregado correctamente.")
+            else:
+                print("Error al agregar:", contenido[2:] if contenido.startswith("NK") else contenido)
+
+        # 3) ELIMINAR
+        elif opcion == "3":
+            rut     = input("RUT a eliminar: ")
+            datos   = f"DEL|{rut}".encode()
+            contenido = com_bus(prefijo + datos)   # e.g. "OK" or "NK..."
+            if contenido.startswith("OK"):
+                print("Cliente miembro eliminado correctamente.")
+            else:
+                print("Error al eliminar:", contenido[2:] if contenido.startswith("NK") else contenido)
+
         else:
-            print("Opción no válida.") 
+            print("Opción no válida.")
 
 def gestion_proveedores():
     prefijo = b"serv7"
     while True:
-        print("\nOpciones:")
-        print("1. Agregar proveedor")
-        print("2. Eliminar proveedor")
-        print("3. Agregar producto a proveedor")
-        print("4. Volver al menú")
-
+        print("\nGestión de Proveedores:")
+        print("  1) Listar proveedores")
+        print("  2) Agregar proveedor")
+        print("  3) Eliminar proveedor")
+        print("  4) Agregar producto a proveedor")
+        print("  5) Volver al menú")
         opcion = input("Seleccione una opción: ")
-        if opcion == "4":
-            print("Volviendo al menú...\n")
+
+        if opcion == "5":
             break
-        elif opcion == "1":
-            print(f"Ejecutando función {opcion} (sin acción por ahora).")
+
+        # 1) LISTAR
+        if opcion == "1":
+            mensaje = prefijo + b"LIST"
+            contenido = com_bus(mensaje)  # e.g. "OK[{...},...]"
+            if contenido.startswith("OK"):
+                cuerpo = contenido[2:]
+                try:
+                    lista = json.loads(cuerpo)
+                    print("\nRUT       │ Nombre        │ Correo")
+                    print("───────────┼───────────────┼──────────────────────")
+                    for p in lista:
+                        print(f"{p['rut']:<10} ┃ {p['nombre']:<13} ┃ {p['correo']}")
+                        if p.get("productos"):
+                            for prod in p["productos"]:
+                                print(f"    • {prod['codigo_producto']} @ ${prod['precio_compra']}")
+                except json.JSONDecodeError:
+                    print("Error al parsear lista:", cuerpo)
+            else:
+                print("ERROR:", contenido)
+
+        # 2) AGREGAR PROVEEDOR
         elif opcion == "2":
-            print(f"Ejecutando función {opcion} (sin acción por ahora).")
+            rut  = input("RUT (8 dígitos): ")
+            nom  = input("Nombre: ")
+            mail = input("Correo electrónico: ")
+            datos    = f"ADD|{rut}|{nom}|{mail}".encode()
+            contenido = com_bus(prefijo + datos)  # puede llegar "OK", "OKOK", "NK…", etc.
+            if contenido.startswith("OK"):
+                print("Proveedor agregado correctamente.")
+            else:
+                print("Error al agregar:", contenido[2:] if contenido.startswith("NK") else contenido)
+
+        # 3) ELIMINAR PROVEEDOR
         elif opcion == "3":
-            print(f"Ejecutando función {opcion} (sin acción por ahora).")
+            rut = input("RUT a eliminar: ")
+            datos = f"DEL|{rut}".encode()
+            contenido = com_bus(prefijo + datos)
+            if contenido.startswith("OK"):
+                print("Proveedor eliminado correctamente.")
+            else:
+                print("Error al eliminar:", contenido[2:] if contenido.startswith("NK") else contenido)
+
+        # 4) AGREGAR PRODUCTO A PROVEEDOR
+        elif opcion == "4":
+            rut    = input("RUT del proveedor: ")
+            prod   = input("Código producto (8): ")
+            precio = input("Precio de compra: ")
+            datos = f"APROD|{rut}|{prod}|{precio}".encode()
+            contenido = com_bus(prefijo + datos)
+            if contenido.startswith("OK"):
+                print("Producto asociado correctamente.")
+            else:
+                print("Error al asociar producto:", contenido[2:] if contenido.startswith("NK") else contenido)
+
         else:
-            print("Opción no válida.") 
+            print("Opción no válida.")
 
 def gestion_productos():
     prefijo = b"serv6"
@@ -219,21 +308,69 @@ def registro_ventas():
 def gestion_trabajadores():
     prefijo = b"serv1"
     while True:
-        print("\nOpciones:")
-        print("1. Agregar trabajador")
-        print("2. Eliminar trabajador")
-        print("3. Volver al menú")
-
+        print("\nGestión de Trabajadores:")
+        print("  1) Listar trabajadores")
+        print("  2) Agregar trabajador")
+        print("  3) Eliminar trabajador")
+        print("  4) Volver al menú")
         opcion = input("Seleccione una opción: ")
-        if opcion == "3":
+
+        if opcion == "4":
             print("Volviendo al menú...\n")
             break
-        elif opcion == "1":
-            print(f"Ejecutando función {opcion} (sin acción por ahora).")
+
+        # 1) LISTAR
+        if opcion == "1":
+            mensaje = prefijo + b"fun0"
+            contenido = com_bus(mensaje)  # e.g. "OK[...json...]"
+            if contenido.startswith("OK"):
+                cuerpo = contenido[2:]
+                try:
+                    lista = json.loads(cuerpo)
+                    print("\nRUT     │ Nombre      │ Apellido    │ Cuenta   │ Correo               │ Rol")
+                    print("─────────┼──────────────┼─────────────┼──────────┼──────────────────────┼─────")
+                    for t in lista:
+                        print(f"{t['rut']} ┃ {t['nombre']:<12} ┃ {t['apellido']:<11} ┃ "
+                              f"{t['nombre_cuenta']:<8} ┃ {t['correo']:<20} ┃ {t['rol']}")
+                except json.JSONDecodeError:
+                    print("Error al decodificar JSON:", cuerpo)
+            else:
+                # si llegó NK o algo inesperado
+                print("Error al listar:", contenido[2:] if contenido.startswith("NK") else contenido)
+
+        # 2) AGREGAR
         elif opcion == "2":
-            print(f"Ejecutando función {opcion} (sin acción por ahora).")
+            rut     = input("RUT (8 dígitos): ")
+            nombre  = input("Nombre: ")
+            apellido= input("Apellido: ")
+            correo  = input("Correo electrónico: ")
+            datos   = f"fun1{rut}|{nombre}|{apellido}|{correo}".encode()
+            mensaje = prefijo + datos
+            contenido = com_bus(mensaje)  # e.g. "OK{"..."}" o "NK<error>"
+            if contenido.startswith("OK"):
+                payload = contenido[2:]
+                try:
+                    info = json.loads(payload)
+                    print(f"Trabajador agregado. Cuenta: {info['nombre_cuenta']}, Contraseña: {info['contrasena']}")
+                except json.JSONDecodeError:
+                    print("Respuesta inesperada al agregar:", payload)
+            else:
+                print("Error al agregar:", contenido[2:] if contenido.startswith("NK") else contenido)
+
+        # 3) ELIMINAR
+        elif opcion == "3":
+            rut = input("RUT a eliminar: ")
+            datos = f"fun2{rut}".encode()
+            mensaje = prefijo + datos
+            contenido = com_bus(mensaje)      
+            if contenido.startswith("OK"):
+                print("Trabajador eliminado correctamente.")
+            else:
+
+                print("Error al eliminar:", contenido[2:] if contenido.startswith("NK") else contenido)
+
         else:
-            print("Opción no válida.") 
+            print("Opción no válida.")
 
 def mostrar_menu():
     while True:
