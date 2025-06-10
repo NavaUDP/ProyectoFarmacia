@@ -78,8 +78,6 @@ CREATE TABLE detalle_compra (
 );
 
 
-
-
 INSERT INTO trabajador (
   rut_trabajador, nombre, apellido, nombre_cuenta, contraseña, correo_electronico, rol
 ) VALUES (
@@ -99,3 +97,15 @@ INSERT INTO producto (
   ('PROD0001', 'Menta', 100, 1200),
   ('PROD0002', 'Crema', 50, 900),
   ('PROD0003', 'Vitaminas', 200, 1500);
+
+INSERT INTO proveedor (rut_proveedor, nombre, correo_electronico) VALUES
+  ('11111111', 'Proveedor 1', 'prov1@correo.cl'),
+  ('22222222', 'Proveedor 2', 'prov2@correo.cl'),
+  ('33333333', 'Proveedor 3', 'prov3@correo.cl');
+
+INSERT INTO producto_proveedor (
+  id_producto_proveedor, codigo_producto, rut_proveedor, precio_compra
+) VALUES
+  ('c1a1e1b2-0001-4000-8000-000000000001', 'PROD0001', '11111111', 800),
+  ('c1a1e1b2-0002-4000-8000-000000000002', 'PROD0002', '22222222', 600),
+  ('c1a1e1b2-0003-4000-8000-000000000003', 'PROD0003', '33333333', 1100);

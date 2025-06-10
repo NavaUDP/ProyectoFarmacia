@@ -291,19 +291,51 @@ def registro_compras():
 
 def registro_ventas():
     prefijo = b"serv2"
-    while True:
-        print("\nOpciones:")
-        print("1. Registrar venta")
-        print("2. Volver al menú")
+    try:
+        while True:
+            print("\nOpciones:")
+            print("1. Registrar venta")
+            print("2. Volver al menú")
 
-        opcion = input("Seleccione una opción: ")
-        if opcion == "2":
-            print("Volviendo al menú...\n")
-            break
-        elif opcion == "1":
-            print(f"Ejecutando función {opcion} (sin acción por ahora).")
-        else:
-            print("Opción no válida.") 
+            opcion = input("Seleccione una opción: ")
+            if opcion == "2":
+                print("Volviendo al menú...\n")
+                break
+            elif opcion == "1":
+                #Ejecuta el servicio de registro de ventas
+                # El rut el trabajador se vuelve a ingresar
+                rut_trabajador = input("Ingrese su RUT (8 dígitos): ")
+                if len(rut_trabajador) != 8 or not rut_trabajador.isdigit():
+                    print("RUT inválido. Debe tener 8 dígitos.")
+                    continue
+                rut_cliente = input("Ingrese el rut del cliente (8 dígitos) o 'None' si es público general: ")
+                puntos = input("Ingrese los puntos a usar (0 si no es miembro): ")
+                productos = []
+                while True:
+                    codigo_producto = input("Ingrese el código del producto o 'fin' para finalizar: ")
+                    if codigo_producto.lower() == 'fin':
+                        break
+                    cantidad = input(f"Ingrese la cantidad de {codigo_producto}: ")
+                    productos.append(f"{codigo_producto},{cantidad}")
+                if not productos:
+                    print("Debe ingresar al menos un producto.")
+                    continue
+                datos_venta = f"{rut_cliente};{puntos};{rut_trabajador};" + ";".join(productos)
+                payload = prefijo + datos_venta.encode()
+
+                contenido = com_bus(payload)  # e.g. "OK" or "NK<error>"
+                if contenido.startswith("OK"):
+                    print("Venta registrada correctamente.")
+                else:
+                    print("Error al registrar la venta:", contenido[2:] if contenido.startswith("NK") else contenido)
+
+            else:
+                print("Opción no válida.") 
+    except Exception as e:
+        print(f"Error en registro de ventas: {e}")
+    finally:
+        sock.close()
+        print("Cliente desconectado del servicio de ventas.")
 
 def gestion_trabajadores():
     prefijo = b"serv1"

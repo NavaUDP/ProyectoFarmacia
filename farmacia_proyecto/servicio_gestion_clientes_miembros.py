@@ -9,8 +9,8 @@ class MiembroServiceDB:
         
         self.conn = psycopg2.connect(
             dbname="farmacia",
-            user="", # Poner nombre
-            password="", # Poner contraseña
+            user="root", # Poner nombre
+            password="postgres", # Poner contraseña
             host="localhost",
                                 # Poner puerto (port=PUERTO)
         )
