@@ -17,27 +17,6 @@ SERVICE_NAME = "serv2" #5 caracteres
 HOST = 'localhost'
 PORT = 5000
 
-def prueba_conn():
-    conn = psycopg2.connect(
-        dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, host=DB_HOST, port=DB_PORT
-    )
-    cursor = conn.cursor()
-    query = """
-        SELECT * FROM producto;
-    """
-    cursor.execute(query)
-    rows = cursor.fetchall()  # Lee todos los resultados
-
-    if rows:
-        print("ejecución correcta de la query")
-    else:
-        print("Error")
-
-    if 'cursor' in locals():
-        cursor.close()
-    if 'conn' in locals():
-        conn.close()
-
 # -- Lógica del servicio --
 #Recibe la informaicion en forma de : 
 # "RUT_CLIENTE, PUNTOS_USADOS, RUT_TRABAJADOR; CODIGO1, CANTIDAD1, CODIGO2, CANTIDAD2, ..."

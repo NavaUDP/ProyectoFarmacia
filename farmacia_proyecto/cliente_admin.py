@@ -277,7 +277,7 @@ def registro_compras():
     prefijo = b"serv3"
     while True:
         print("\nOpciones:")
-        print("1. Registrar comprar")
+        print("1. Registrar compra")
         print("2. Volver al menú")
 
         opcion = input("Seleccione una opción: ")
@@ -285,7 +285,37 @@ def registro_compras():
             print("Volviendo al menú...\n")
             break
         elif opcion == "1":
-            print(f"Ejecutando función {opcion} (sin acción por ahora).")
+
+            # Ejecuta el servicio de registro de compras
+            rut_trabajador = input("Ingrese su RUT (8 dígitos): ")
+            if len(rut_trabajador) != 8 or not rut_trabajador.isdigit():
+                print("RUT inválido. Debe tener 8 dígitos.")
+                continue
+
+            rut_proveedor = input("Ingrese el RUT del proveedor (8 dígitos): ")
+            if len(rut_proveedor) != 8 or not rut_proveedor.isdigit():
+                print("RUT inválido. Debe tener 8 dígitos.")
+                continue
+
+            productos = []
+            while True: 
+                codigo_producto = input("Ingrese el código del producto o 'fin' para finalizar: ")
+                if codigo_producto.lower() == 'fin':
+                    break
+                cantidad = input(f"Ingrese la cantidad de {codigo_producto}: ")
+                productos.append(f"{codigo_producto},{cantidad}")
+            if not productos:
+                print("Debe ingresar al menos un producto.")
+                continue
+            datos_compra = f"{rut_trabajador};{rut_proveedor};" + ";".join(productos)
+            payload = prefijo + datos_compra.encode()
+
+            contenido = com_bus(payload)  
+            if contenido.startswith("OK"):
+                print("Compra registrada correctamente.")
+            else:
+                print("Error al registrar la compra:", contenido[2:] if contenido.startswith("NK") else contenido)
+
         else:
             print("Opción no válida.") 
 
