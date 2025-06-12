@@ -67,7 +67,7 @@ def process_purchase(payload: str):
 
             #Actualizar el stock de producto
             for item in items_to_buy:
-                cursor.excecute(
+                cursor.execute(
                     "UPDATE producto SET stock = stock + %s WHERE codigo_producto = %s",
                     (item['cantidad'], item['codigo'])
                 )
@@ -90,9 +90,8 @@ def process_purchase(payload: str):
                     INSERT INTO detalle_compra (id_detalle, id_compra, id_producto_proveedor, cantidad, precio_unitario)
                     VALUES (%s, %s, (SELECT id_producto_proveedor FROM producto_proveedor WHERE rut_proveedor = %s AND codigo_producto = %s), %s, %s)
                     """,
-                    (str(id_detalle, str(id_compra), rut_proveedor, item['codigo'], item['cantidad'], productos_info[item['codigo']]['precio_compra']))
-                )
-            
+                    (str(id_detalle), str(id_compra), rut_proveedor, item['codigo'], item['cantidad'], productos_info[item['codigo']]['precio_compra'])
+                )       
             #Finalizar transacción
             conn.commit()
             return "OK", f"Compra registrada exitosamente. ID de compra: {id_compra}."
@@ -150,8 +149,9 @@ def main():
             # Procesar el payload recibido
             payload = data.decode()
             print(f"Mensaje recibido: {payload}")
+            print(f"Mensaje recibido (repr): {repr(payload)}")
 
-            if payload.startswith("serv3s"):
+            if payload.startswith("serv3"):
                 command = payload[5:] if payload[5] != ' ' else payload[6:]
                 status, message = process_purchase(command)
 
@@ -163,7 +163,7 @@ def main():
 
     except Exception as e:
         print(f"Ocurrió un error: {e}")
-    finally:
+    finally:    
         sock.close()
 
 if __name__ == "__main__":
