@@ -7,11 +7,11 @@ class TrabajadorServiceDB:
     def __init__(self):
         
         self.conn = psycopg2.connect(
-            dbname="farmacia",
-            user="", # Poner nombre
-            password="", # Poner contraseña
+            dbname="postgres",
+            user="postgres", # Poner nombre
+            password="postgres", # Poner contraseña
             host="localhost",
-                                # Poner puerto
+            port=5432                    # Poner puerto
         )
         # Usamos RealDictCursor para obtener filas como dict
         self.conn.autocommit = True

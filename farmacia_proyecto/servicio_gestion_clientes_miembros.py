@@ -8,11 +8,11 @@ class MiembroServiceDB:
     def __init__(self):
         
         self.conn = psycopg2.connect(
-            dbname="farmacia",
-            user="root", # Poner nombre
+            dbname="postgres",
+            user="postgres", # Poner nombre
             password="postgres", # Poner contraseña
             host="localhost",
-                                # Poner puerto (port=PUERTO)
+            port=5432                    # Poner puerto (port=PUERTO)
         )
         # Usar RealDictCursor para obtener filas como dict
         self.conn.autocommit = True

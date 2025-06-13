@@ -5,10 +5,11 @@ def modificar_precio(payload):
     try:
         codigo, precio = payload.split('|')
         conn = psycopg2.connect(
-            dbname="farmacia",
-            user="", #poner su usuario
+            dbname="postgres",
+            user="postgres", #poner su usuario
             password="postgres", #poner su contraseña
-            host="localhost"
+            host="localhost",
+            port=5432
         )
         cursor = conn.cursor()
         query = """

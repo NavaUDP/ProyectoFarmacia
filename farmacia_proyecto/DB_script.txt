@@ -31,7 +31,7 @@ CREATE TABLE venta (
   id_venta UUID PRIMARY KEY,
   rut_miembro CHAR(8) REFERENCES miembro(rut_miembro),
   rut_trabajador CHAR(8) REFERENCES trabajador(rut_trabajador),
-  fecha DATE,
+  fecha DATE,  -- <<< CAMPO AÑADIDO
   total_venta_bruto INTEGER,
   puntos_usados INTEGER,
   total_venta_final INTEGER
@@ -64,7 +64,7 @@ CREATE TABLE producto_proveedor (
 -- Tabla compra
 CREATE TABLE compra (
   id_compra UUID PRIMARY KEY,
-  fecha DATE,
+  fecha DATE,  -- <<< CAMPO AÑADIDO
   total_compra INTEGER
 );
 
@@ -78,13 +78,13 @@ CREATE TABLE detalle_compra (
 );
 
 
+-- DATOS DE EJEMPLO --
 INSERT INTO trabajador (
   rut_trabajador, nombre, apellido, nombre_cuenta, contraseña, correo_electronico, rol
 ) VALUES (
   '12345678', 'ADMIN', 'ADMIN', 'admin', 'pass1', 'admin@empresa.cl', TRUE
 );
 
--- Operativo
 INSERT INTO trabajador (
   rut_trabajador, nombre, apellido, nombre_cuenta, contraseña, correo_electronico, rol
 ) VALUES (

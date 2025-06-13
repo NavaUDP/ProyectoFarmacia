@@ -258,10 +258,12 @@ def gestion_inventario():
             print("Opción no válida.") 
 
 def generacion_reportes():
-    prefijo = b"serv4"
+    service_name = "serv4"
+    prefijo = service_name.encode('utf-8')
+
     while True:
-        print("\nOpciones:")
-        print("1. Generar reporte")
+        print("\n--- Generación de Reportes ---")
+        print("1. Generar reporte por mes")
         print("2. Volver al menú")
 
         opcion = input("Seleccione una opción: ")
@@ -269,9 +271,42 @@ def generacion_reportes():
             print("Volviendo al menú...\n")
             break
         elif opcion == "1":
-            print(f"Ejecutando función {opcion} (sin acción por ahora).")
+            fecha_reporte = input("Ingrese el mes y año del reporte (formato AAAA-MM): ")
+            # Validar formato simple (puede mejorarse con regex o datetime)
+            if len(fecha_reporte) != 7 or fecha_reporte[4] != '-':
+                print("Formato inválido. Use AAAA-MM.")
+                continue
+
+            mensaje = prefijo + fecha_reporte.encode()
+            contenido = com_bus(mensaje) # com_bus ya imprime la respuesta raw
+
+            if contenido.startswith("OK"):
+                cuerpo_json = contenido[2:]
+                try:
+                    reporte = json.loads(cuerpo_json)
+                    print("\n--- Reporte para el período", fecha_reporte, "---")
+                    print("\n[ VENTAS ]")
+                    print(f"  - Monto Total Vendido: ${reporte.get('ventas_monto_total', 0):,}".replace(",", "."))
+                    print(f"  - Cantidad de Productos Vendidos: {reporte.get('ventas_cantidad_total', 0)}")
+                    print(f"  - Top 3 Productos Vendidos: {', '.join(reporte.get('ventas_top_3_productos', [])) or 'N/A'}")
+                    
+                    print("\n[ COMPRAS ]")
+                    print(f"  - Monto Total Comprado: ${reporte.get('compras_monto_total', 0):,}".replace(",", "."))
+                    print(f"  - Cantidad de Productos Comprados: {reporte.get('compras_cantidad_total', 0)}")
+                    print(f"  - Top 3 Productos Comprados: {', '.join(reporte.get('compras_top_3_productos', [])) or 'N/A'}")
+
+                    print("\n[ RESUMEN ]")
+                    print(f"  - Ganancia Total: ${reporte.get('ganancia_total', 0):,}".replace(",", "."))
+                    print("-----------------------------------------\n")
+
+                except json.JSONDecodeError:
+                    print("Error: La respuesta del servidor no es un JSON válido:", cuerpo_json)
+            else:
+                # Si la respuesta es NK<error> u otra cosa
+                error_msg = contenido[2:] if contenido.startswith("NK") else contenido
+                print("Error al generar el reporte:", error_msg)
         else:
-            print("Opción no válida.") 
+            print("Opción no válida.")
 
 def registro_compras():
     prefijo = b"serv3"
@@ -285,7 +320,6 @@ def registro_compras():
             print("Volviendo al menú...\n")
             break
         elif opcion == "1":
-
             # Ejecuta el servicio de registro de compras
             rut_trabajador = input("Ingrese su RUT (8 dígitos): ")
             if len(rut_trabajador) != 8 or not rut_trabajador.isdigit():
