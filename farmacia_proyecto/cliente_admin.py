@@ -397,9 +397,6 @@ def registro_ventas():
                 print("Opción no válida.") 
     except Exception as e:
         print(f"Error en registro de ventas: {e}")
-    finally:
-        sock.close()
-        print("Cliente desconectado del servicio de ventas.")
 
 def gestion_trabajadores():
     prefijo = b"serv1"

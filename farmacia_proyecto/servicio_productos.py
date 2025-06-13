@@ -37,10 +37,11 @@ def eliminar_producto(payload):
     try:
         codigo = payload
         conn = psycopg2.connect(
-            dbname="farmacia",
-            user="", #poner su usuario
-            password="", #poner su contraseña
-            host="localhost"
+            dbname="postgres",
+            user="postgres", #poner su usuario
+            password="postgres", #poner su contraseña
+            host="localhost",
+            port=5432
         )
         cursor = conn.cursor()
         query = "DELETE FROM producto WHERE codigo_producto = %s;"
@@ -64,10 +65,11 @@ def agregar_producto(payload):
     try:
         codigo, nombre, stock, precio = payload.split('|')
         conn = psycopg2.connect(
-            dbname="farmacia",
-            user="", #poner su usuario
-            password="", #poner su contraseña
-            host="localhost"
+            dbname="postgres",
+            user="postgres", #poner su usuario
+            password="postgres", #poner su contraseña
+            host="localhost",
+            port=5432
         )
         cursor = conn.cursor()
         query = """
@@ -93,10 +95,11 @@ def agregar_producto(payload):
 def listar_productos():
     try:
         conn = psycopg2.connect(
-            dbname="farmacia",
-            user="", #poner su usuario
-            password="", #poner su contraseña
-            host="localhost"
+            dbname="postgres",
+            user="postgres", #poner su usuario
+            password="postgres", #poner su contraseña
+            host="localhost",
+            port=5432
         )
         cursor = conn.cursor()
         

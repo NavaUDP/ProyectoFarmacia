@@ -23,7 +23,7 @@ class TrabajadorServiceDB:
                        nombre,
                        apellido,
                        nombre_cuenta,
-                       contraseña   AS contrasena,
+                       password   AS contrasena,
                        correo_electronico AS correo,
                        rol
                   FROM trabajador
@@ -35,7 +35,7 @@ class TrabajadorServiceDB:
         # Validaciones iguales a antes
         if len(rut) != 8 or not rut.isdigit():
             raise ValueError("RUT inválido")
-        # Generamos cuenta y contraseña al vuelo
+        # Generamos cuenta y password al vuelo
         cuenta = rut[:7]
         pwd = self._gen_pass()
 
@@ -44,7 +44,7 @@ class TrabajadorServiceDB:
                 cur.execute("""
                     INSERT INTO trabajador (
                       rut_trabajador, nombre, apellido,
-                      nombre_cuenta, contraseña, correo_electronico, rol
+                      nombre_cuenta, password, correo_electronico, rol
                     ) VALUES (
                       %s, %s, %s,
                       %s, %s, %s, %s
