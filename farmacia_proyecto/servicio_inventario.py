@@ -5,11 +5,10 @@ def modificar_stock(payload):
     try:
         codigo, stock = payload.split('|')
         conn = psycopg2.connect(
-            dbname="postgres",
+            dbname="farmacia",
             user="postgres", #Poner su usuario
             password="postgres", #poner su contraseña
-            host="localhost",
-            port=5432
+            host="localhost"
         )
 
         cursor = conn.cursor()
@@ -37,11 +36,10 @@ def modificar_stock(payload):
 def listar_productos():
     try:
         conn = psycopg2.connect(
-            dbname="postgres",
+            dbname="farmacia",
             user="postgres", #Poner su usuario
             password="postgres", #poner su contraseña
-            host="localhost",
-            port=5432
+            host="localhost"
         )
         cursor = conn.cursor()
         

@@ -8,7 +8,7 @@ class MiembroServiceDB:
     def __init__(self):
         
         self.conn = psycopg2.connect(
-            dbname="postgres",
+            dbname="farmacia",
             user="postgres", # Poner nombre
             password="postgres", # Poner contraseña
             host="localhost",

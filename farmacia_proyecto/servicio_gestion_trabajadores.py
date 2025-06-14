@@ -2,16 +2,16 @@ import socket
 import json
 import psycopg2
 from psycopg2.extras import RealDictCursor
+import smtplib
 
 class TrabajadorServiceDB:
     def __init__(self):
         
         self.conn = psycopg2.connect(
-            dbname="postgres",
+            dbname="farmacia",
             user="postgres", # Poner nombre
             password="postgres", # Poner contraseña
             host="localhost",
-            port=5432                    # Poner puerto
         )
         # Usamos RealDictCursor para obtener filas como dict
         self.conn.autocommit = True
@@ -22,8 +22,7 @@ class TrabajadorServiceDB:
                 SELECT rut_trabajador AS rut,
                        nombre,
                        apellido,
-                       nombre_cuenta,
-                       password   AS contrasena,
+                       contraseña   AS contrasena,
                        correo_electronico AS correo,
                        rol
                   FROM trabajador
@@ -35,24 +34,39 @@ class TrabajadorServiceDB:
         # Validaciones iguales a antes
         if len(rut) != 8 or not rut.isdigit():
             raise ValueError("RUT inválido")
-        # Generamos cuenta y password al vuelo
-        cuenta = rut[:7]
+        # Generamos password al vuelo
         pwd = self._gen_pass()
 
         with self.conn.cursor() as cur:
             try:
                 cur.execute("""
                     INSERT INTO trabajador (
-                      rut_trabajador, nombre, apellido,
-                      nombre_cuenta, password, correo_electronico, rol
+                      rut_trabajador, nombre, apellido, contraseña, correo_electronico, rol
                     ) VALUES (
                       %s, %s, %s,
-                      %s, %s, %s, %s
+                      %s, %s, %s
                     )
-                """, (rut, nombre, apellido, cuenta, pwd, correo, False))
+                """, (rut, nombre, apellido, pwd, correo, False))
             except psycopg2.IntegrityError:
                 raise ValueError(f"Ya existe un trabajador con RUT '{rut}'.")
-        return {"nombre_cuenta": cuenta, "contrasena": pwd}
+            try:
+                smtp_server = 'smtp.gmail.com'
+                smtp_user = '' #tu correo
+                smtp_password = '' #tu app password
+
+                # Enviar el correo
+                with smtplib.SMTP(smtp_server, 587) as server:
+                    server.starttls()
+                    server.login(smtp_user, smtp_password)
+                    server.sendmail(smtp_user, correo, 
+                                    f"Subject: Usuario creado en la farmacia \nTu contrasena es {pwd}")
+            except smtplib.SMTPRecipientsRefused:
+                cur.execute("""
+                DELETE FROM trabajador
+                  WHERE rut_trabajador = %s
+                """, (rut,))
+                raise ValueError(f"Correo rechazado: '{correo}' no existe")
+        return {"rut": rut, "contrasena": pwd}
 
     def eliminar(self, rut):
         if len(rut) != 8 or not rut.isdigit():

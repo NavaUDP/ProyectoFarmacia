@@ -9,7 +9,7 @@ class ProveedorServiceDB:
     def __init__(self):
         # Conectar a la BD 'farmacia'
         self.conn = psycopg2.connect(
-            dbname="postgres",
+            dbname="farmacia",
             user="postgres", # Poner nombre
             password="postgres", # Poner contraseña
             host="localhost",
@@ -129,6 +129,37 @@ class ProveedorServiceDB:
             if cur.rowcount == 0:
                 raise ValueError("Asociación no existe")
 
+    def mod_pre(self, rut, cod, precio):
+        if len(rut) != 8 or not rut.isdigit():
+            raise ValueError("RUT inválido")
+        if len(cod) != 8:
+            raise ValueError("Código de producto inválido")
+        if precio <= 0:
+            raise ValueError("Precio debe ser positivo")
+
+        with self.conn.cursor() as cur:
+            # Verificar que el proveedor existe
+            cur.execute("""
+                SELECT 1 FROM proveedor WHERE rut_proveedor = %s
+            """, (rut,))
+            if cur.fetchone() is None:
+                raise ValueError("Proveedor no existe")
+            # Verificar que exista esa asociación
+            cur.execute("""
+                SELECT 1
+                  FROM producto_proveedor
+                 WHERE rut_proveedor = %s
+                   AND codigo_producto = %s
+            """, (rut, cod))
+            if not cur.fetchone():
+                raise ValueError("Producto NO asociado a este proveedor")
+            # Modificar precio
+            cur.execute("""
+                UPDATE producto_proveedor
+                SET precio_compra = %s
+                WHERE codigo_producto = %s AND rut_proveedor = %s;
+                """, (precio, cod, rut))
+
     def close(self):
         self.conn.close()
 
@@ -203,6 +234,11 @@ def main():
                 elif cmd == "DPROD":
                     _, rut, cod = parts
                     servicio.del_prod(rut, cod)
+                    resp = "OK"
+
+                elif cmd == "MODIF":
+                    _, rut, cod, pr = parts
+                    servicio.mod_pre(rut, cod, int(pr))
                     resp = "OK"
 
                 else:

@@ -8,11 +8,10 @@ def verificar_credenciales(payload):
         usuario, password, rol = contenido.split('|')
         rol = rol.strip().lower() in ['true', '1', 'yes']
         conn = psycopg2.connect(
-            dbname="postgres",
+            dbname="farmacia",
             user="postgres", #poner su nombre
             password="postgres", #poner su contraseña
-            host="localhost",
-            port=5432
+            host="localhost"
         )
 
         cursor = conn.cursor()
@@ -20,7 +19,7 @@ def verificar_credenciales(payload):
         query = """
         SELECT EXISTS (
             SELECT 1 FROM trabajador
-            WHERE nombre_cuenta = %s AND password = %s AND rol = %s
+            WHERE rut_trabajador = %s AND contraseña = %s AND rol = %s
         );
         """
         cursor.execute(query, (usuario, password, rol))
