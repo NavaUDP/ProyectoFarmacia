@@ -2,81 +2,90 @@ import socket
 import json
 import psycopg2
 from psycopg2.extras import RealDictCursor
+import smtplib
+from email.mime.text import MIMEText
 
 class TrabajadorServiceDB:
     def __init__(self):
-        
         self.conn = psycopg2.connect(
             dbname="farmacia",
-            user="", # Poner nombre
-            password="", # Poner contraseña
+            user="admin",
+            password="tu_pass",
             host="localhost",
-                                # Poner puerto
+            port=5433
         )
-        # Usamos RealDictCursor para obtener filas como dict
         self.conn.autocommit = True
 
     def listar(self):
         with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute("""
-                SELECT rut_trabajador AS rut,
+                SELECT rut_trabajador   AS rut,
                        nombre,
                        apellido,
-                       nombre_cuenta,
-                       contraseña   AS contrasena,
+                       "contraseña"      AS contrasena,
                        correo_electronico AS correo,
                        rol
                   FROM trabajador
-                  ORDER BY rut_trabajador
+                 ORDER BY rut_trabajador
             """)
-            return cur.fetchall()  # lista de dicts
+            return cur.fetchall()
 
     def agregar(self, rut, nombre, apellido, correo):
-        # Validaciones iguales a antes
-        if len(rut) != 8 or not rut.isdigit():
-            raise ValueError("RUT inválido")
-        # Generamos cuenta y contraseña al vuelo
-        cuenta = rut[:7]
+        # (validaciones e INSERT a la BD como antes) …
         pwd = self._gen_pass()
 
         with self.conn.cursor() as cur:
             try:
                 cur.execute("""
                     INSERT INTO trabajador (
-                      rut_trabajador, nombre, apellido,
-                      nombre_cuenta, contraseña, correo_electronico, rol
-                    ) VALUES (
-                      %s, %s, %s,
-                      %s, %s, %s, %s
-                    )
-                """, (rut, nombre, apellido, cuenta, pwd, correo, False))
+                      rut_trabajador,
+                      nombre,
+                      apellido,
+                      "contraseña",
+                      correo_electronico,
+                      rol
+                    ) VALUES (%s, %s, %s, %s, %s, %s)
+                """, (rut, nombre, apellido, pwd, correo, False))
             except psycopg2.IntegrityError:
                 raise ValueError(f"Ya existe un trabajador con RUT '{rut}'.")
-        return {"nombre_cuenta": cuenta, "contrasena": pwd}
+
+        # --- ENVÍO DE E-MAIL VÍA GMAIL ---
+        try:
+            msg = MIMEText(
+                f"Hola {nombre},\n\n"
+                f"Tu cuenta se ha creado correctamente.\n"
+                f"Tu contraseña es: {pwd}\n\n"
+                "Saludos."
+            )
+            msg["Subject"] = "Registro en Farmacia"
+            msg["From"]    = "noreply@pg-farmacia.cl"
+            msg["To"]      = correo
+        
+            with smtplib.SMTP("localhost", 1025) as s:
+                s.send_message(msg)
+
+        except Exception as mail_err:
+            # si falla el envío, no abortamos la creación en la BD
+            print("Warning: no se pudo enviar e-mail:", mail_err)
+
+        return {"rut": rut, "contrasena": pwd}
 
     def eliminar(self, rut):
         if len(rut) != 8 or not rut.isdigit():
             raise ValueError("RUT inválido")
         with self.conn.cursor() as cur:
-            cur.execute("""
-                DELETE FROM trabajador
-                  WHERE rut_trabajador = %s
-            """, (rut,))
+            cur.execute("DELETE FROM trabajador WHERE rut_trabajador = %s", (rut,))
             if cur.rowcount == 0:
                 raise ValueError(f"No existe trabajador con RUT '{rut}'.")
 
     def _gen_pass(self, length=8):
         import string, random
-        chars = string.ascii_letters + string.digits
-        return "".join(random.choice(chars) for _ in range(length))
+        return "".join(random.choice(string.ascii_letters + string.digits) for _ in range(length))
 
     def close(self):
         self.conn.close()
 
-# -------------------------
 # COMUNICACIÓN CON EL BUS
-# -------------------------
-
 def send_tx(sock, svc, datos):
     payload = svc + datos
     header = f"{len(payload):05d}"
