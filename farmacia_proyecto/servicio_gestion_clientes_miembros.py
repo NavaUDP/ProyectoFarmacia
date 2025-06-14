@@ -4,19 +4,19 @@ import json
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
+
 class MiembroServiceDB:
     def __init__(self):
         
         self.conn = psycopg2.connect(
             dbname="farmacia",
-            user="", # Poner nombre
-            password="", # Poner contraseña
+            user="admin", # Poner nombre
+            password="tu_pass", # Poner contraseña 
             host="localhost",
-                                # Poner puerto (port=PUERTO)
+            port=5433                    # Poner puerto
         )
-        # Usar RealDictCursor para obtener filas como dict
+        # Usamos RealDictCursor para obtener filas como dict
         self.conn.autocommit = True
-
     def listar(self):
         with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute("""
