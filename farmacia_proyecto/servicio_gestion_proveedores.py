@@ -10,10 +10,10 @@ class ProveedorServiceDB:
         # Conectar a la BD 'farmacia'
         self.conn = psycopg2.connect(
             dbname="farmacia",
-            user="", # Poner nombre
-            password="", # Poner contraseña
+            user="admin", # Poner nombre
+            password="tu_pass", # Poner contraseña 
             host="localhost",
-                                # Poner puerto
+            port=5433                    # Poner puerto
         )
         # Usamos RealDictCursor para obtener filas como dict
         self.conn.autocommit = True
