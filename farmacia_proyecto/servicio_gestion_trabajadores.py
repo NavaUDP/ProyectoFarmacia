@@ -59,14 +59,14 @@ class TrabajadorServiceDB:
                     server.starttls()
                     server.login(smtp_user, smtp_password)
                     server.sendmail(smtp_user, correo, 
-                                    f"Subject: Usuario creado en la farmacia \nTu contrasena es {pwd}")
+                                    f"Subject: Usuario creado en la farmacia para el rut {rut} \nTu contrasena es {pwd}")
             except smtplib.SMTPRecipientsRefused:
                 cur.execute("""
                 DELETE FROM trabajador
                   WHERE rut_trabajador = %s
                 """, (rut,))
                 raise ValueError(f"Correo rechazado: '{correo}' no existe")
-        return {"rut": rut, "contrasena": pwd}
+        return {"rut": rut}
 
     def eliminar(self, rut):
         if len(rut) != 8 or not rut.isdigit():

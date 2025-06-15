@@ -33,28 +33,6 @@ def modificar_stock(payload):
         if 'conn' in locals():
             conn.close()
 
-def listar_productos():
-    try:
-        conn = psycopg2.connect(
-            dbname="farmacia",
-            user="postgres", #Poner su usuario
-            password="postgres", #poner su contraseña
-            host="localhost"
-        )
-        cursor = conn.cursor()
-        
-        query = "SELECT * FROM producto;"
-        cursor.execute(query)
-        
-        productos = cursor.fetchall()
-        return str(productos)
-    finally:
-        if 'cursor' in locals():
-            cursor.close()
-        if 'conn' in locals():
-            conn.close()
-
-
 
 def main():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -78,7 +56,7 @@ def main():
                 chunk = sock.recv(amount_expected - amount_received)
                 amount_received += len(chunk)
                 data += chunk
-            print(f"Mensaje recibido: {data}")
+            #print(f"Mensaje recibido: {data}")
 
             if sinit == 1:
                 sinit = 0
@@ -88,13 +66,9 @@ def main():
 
                 mensaje = data.decode()
                 prefijo = mensaje[:5]
-                funcion = mensaje[5:9]
-                contenido = mensaje[9:]
-                if funcion == "fun0":
-                    respuesta_texto = "serv5" + listar_productos()
-                else:
-                    valido = modificar_stock(contenido)
-                    respuesta_texto = "serv5VALID" if valido else "serv5INVALID"
+                contenido = mensaje[5:]
+                valido = modificar_stock(contenido)
+                respuesta_texto = "serv5VALID" if valido else "serv5INVALID"
                 
                 # Preparar respuesta
 

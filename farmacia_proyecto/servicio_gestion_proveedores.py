@@ -21,22 +21,25 @@ class ProveedorServiceDB:
     def listar(self):
         # Traer todos los proveedores
         with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
+            # Obtener datos de los proveedores
             cur.execute("""
                 SELECT rut_proveedor AS rut,
-                       nombre,
-                       correo_electronico AS correo
-                  FROM proveedor
-                 ORDER BY rut_proveedor
+                    nombre,
+                    correo_electronico AS correo
+                FROM proveedor
+                ORDER BY rut_proveedor
             """)
             proveedores = cur.fetchall()
 
-        # Traer todas las asociaciones producto_proveedor
+        # Obtener asociaciones con nombre del producto
         with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute("""
-                SELECT codigo_producto,
-                       rut_proveedor,
-                       precio_compra
-                  FROM producto_proveedor
+                SELECT pp.codigo_producto,
+                    pr.nombre AS nombre_producto,
+                    pp.rut_proveedor,
+                    pp.precio_compra
+                FROM producto_proveedor pp
+                JOIN producto pr ON pp.codigo_producto = pr.codigo_producto
             """)
             filas = cur.fetchall()
 
@@ -45,6 +48,7 @@ class ProveedorServiceDB:
         for f in filas:
             prod_map.setdefault(f['rut_proveedor'], []).append({
                 "codigo_producto": f['codigo_producto'],
+                "nombre_producto": f['nombre_producto'],
                 "precio_compra": f['precio_compra']
             })
 
@@ -53,6 +57,7 @@ class ProveedorServiceDB:
         for p in proveedores:
             p['productos'] = prod_map.get(p['rut'], [])
             resultado.append(p)
+
         return resultado
 
     def agregar(self, rut, nombre, correo):

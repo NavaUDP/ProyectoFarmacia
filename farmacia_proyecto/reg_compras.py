@@ -99,10 +99,10 @@ def process_purchase(payload: str):
     except psycopg2.Error as e:
         if conn:
             conn.rollback()
-        print(f"Error de base de datos: {e}")
+        #print(f"Error de base de datos: {e}")
         return "NK", "Error interno en la base de datos."
     except (ValueError, IndexError, KeyError) as e:
-        print(f"Error en el formato del payload: {e}")
+        #print(f"Error en el formato del payload: {e}")
         return "NK", "Formato de payload incorrecto."
     finally:
         if conn:
@@ -148,15 +148,15 @@ def main():
 
             # Procesar el payload recibido
             payload = data.decode()
-            print(f"Mensaje recibido: {payload}")
-            print(f"Mensaje recibido (repr): {repr(payload)}")
+            #print(f"Mensaje recibido: {payload}")
+            #print(f"Mensaje recibido (repr): {repr(payload)}")
 
             if payload.startswith("serv3"):
                 command = payload[5:] if payload[5] != ' ' else payload[6:]
                 status, message = process_purchase(command)
 
                 response = format_response(SERVICE_NAME, status, message)
-                print(f"Enviando respuesta: {response}")
+                #print(f"Enviando respuesta: {response}")
                 sock.sendall(response.encode())
             else:
                 print("Mensaje recibido no es para este servicio.")

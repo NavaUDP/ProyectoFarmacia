@@ -31,7 +31,7 @@ def com_bus(mensaje):
         data += chunk
 
     respuesta = data.decode()
-    print(respuesta)
+    #print(respuesta)
     contenido = respuesta[7:]
     return contenido
 
@@ -45,11 +45,16 @@ def gestion_clientes_miembros():
             cuerpo = contenido[2:]
             try:
                 lista = json.loads(cuerpo)
-                print("\nRUT     │ Nombre      │ Apellido    │ Correo               │ Puntos")
-                print("─────────┼──────────────┼─────────────┼──────────────────────┼────────")
+
+                # Imprimir encabezado
+                print("+--------------+--------------+--------------+--------------------------+--------+")
+                print("| RUT          | Nombre       | Apellido     | Correo                   | Puntos |")
+                print("+--------------+--------------+--------------+--------------------------+--------+")
+
                 for m in lista:
-                    print(f"{m['rut']} ┃ {m['nombre']:<12} ┃ {m['apellido']:<11} ┃ "
-                          f"{m['correo']:<20} ┃ {m['puntos']}")
+                    print(f"| {m['rut']:<12} | {m['nombre']:<12} | {m['apellido']:<12} | {m['correo']:<24} | {str(m['puntos']):>6} |")
+
+                print("+--------------+--------------+--------------+--------------------------+--------+")
             except json.JSONDecodeError:
                 print("Error al decodificar JSON:", cuerpo)
         else:
@@ -100,13 +105,16 @@ def gestion_proveedores():
             cuerpo = contenido[2:]
             try:
                 lista = json.loads(cuerpo)
-                print("\nRUT       │ Nombre        │ Correo")
-                print("───────────┼───────────────┼──────────────────────")
-                for p in lista:
-                    print(f"{p['rut']:<10} ┃ {p['nombre']:<13} ┃ {p['correo']}")
-                    if p.get("productos"):
-                        for prod in p["productos"]:
-                            print(f"    • {prod['codigo_producto']} @ ${prod['precio_compra']}")
+                print("-" * 80) 
+                for proveedor in lista:
+                    print(f"Proveedor: {proveedor['nombre']} (RUT: {proveedor['rut']})")
+                    print(f"Correo: {proveedor['correo']}")
+                    print("Productos asociados:")
+                    for producto in proveedor['productos']:
+                        print(f"  - Código: {producto['codigo_producto']:<10} | "
+                            f"Nombre: {producto['nombre_producto']:<20} | "
+                            f"Precio Compra: ${producto['precio_compra']}")
+                    print("-" * 80)
             except json.JSONDecodeError:
                 print("Error al parsear lista:", cuerpo)
         else:
@@ -163,19 +171,19 @@ def gestion_proveedores():
             datos = f"DPROD|{rut}|{prod}".encode()
             contenido = com_bus(prefijo + datos)
             if contenido.startswith("OK"):
-                print("Producto eliminado correctamente del proveedor.")
+                print("Asociación de producto eliminada correctamente.")
             else:
-                print("Error al asociar producto:", contenido[2:] if contenido.startswith("NK") else contenido)
+                print("Error al eliminar asociación:", contenido[2:] if contenido.startswith("NK") else contenido)
         elif opcion == "5":
             rut    = input("RUT del proveedor: ")
             prod   = input("Código producto (8): ")
-            precio = input("Precio de compra: ")
+            precio = input("Precio de compra nuevo: ")
             datos = f"MODIF|{rut}|{prod}|{precio}".encode()
             contenido = com_bus(prefijo + datos)
             if contenido.startswith("OK"):
                 print("Precio modificado correctamente.")
             else:
-                print("Error al asociar producto:", contenido[2:] if contenido.startswith("NK") else contenido)
+                print("Error al modificar precio", contenido[2:] if contenido.startswith("NK") else contenido)
         else:
             print("Opción no válida.")
 
@@ -202,7 +210,7 @@ def gestion_productos():
             print("Volviendo al menú...\n")
             break
         elif opcion == "1":
-            codigo = input("Código del prodcuto: ")
+            codigo = input("Código del producto: ")
             nombre = input("Nombre del producto: ")
             stock = input("Stock inicial: ")
             precio = input("Precio unitario: ")
@@ -232,7 +240,7 @@ def gestion_productos():
             
             contenido = com_bus(mensaje)
             if contenido == "VALID":
-                print("Modificación de precio exitosa .")
+                print("Modificación de precio exitosa.")
             else:
                 print("Modificación de precio fallida.")
         else:
@@ -241,7 +249,7 @@ def gestion_productos():
 def gestion_inventario():
     prefijo = b"serv5"
     while True:
-        mensaje = prefijo + b"fun0"
+        mensaje = b"serv6" + b"fun0"
         contenido = com_bus(mensaje)
 
         productos = ast.literal_eval(contenido)
@@ -260,8 +268,8 @@ def gestion_inventario():
             break
         elif opcion == "1":
             codigo = input("Código del prodcuto: ")
-            stock = input("Nuevo stock: ")
-            datos = f"fun1{codigo}|{stock}".encode()
+            stock = input("Stock a agregar (+) o restar (-): ")
+            datos = f"{codigo}|{stock}".encode()
             mensaje = prefijo + datos
             contenido = com_bus(mensaje)
             if contenido == "VALID":
@@ -325,6 +333,41 @@ def generacion_reportes():
 def registro_compras():
     prefijo = b"serv3"
     while True:
+        mensaje = b"serv7" + b"LIST"
+        contenido = com_bus(mensaje)
+        if contenido.startswith("OK"):
+            cuerpo = contenido[2:]
+            try:
+                lista = json.loads(cuerpo)
+                productos_map: dict[str, list[dict]] = {}
+
+                for prov in lista:
+                    rut = prov["rut"]
+                    nombre_prov = prov["nombre"]
+                    for prod in prov["productos"]:
+                        codigo = prod["codigo_producto"]
+                        nombre_prod = prod["nombre_producto"]
+                        precio = prod["precio_compra"]
+
+                        productos_map.setdefault(codigo, []).append({
+                            "nombre_producto": nombre_prod,
+                            "rut_proveedor": rut,
+                            "nombre_proveedor": nombre_prov,
+                            "precio_compra": precio
+                        })  
+                print("-" * 70)
+                for codigo, provs in productos_map.items():
+                    nombre_prod = provs[0]["nombre_producto"]
+                    print(f"{nombre_prod} (Código: {codigo})")
+                    print("Proveedores asociados:")
+                    for p in provs:
+                        print(f"   • {p['nombre_proveedor']} (RUT: {p['rut_proveedor']}) | Precio compra: ${p['precio_compra']}")
+                    print("-" * 70)
+            except json.JSONDecodeError:
+                print("Error al parsear lista:", cuerpo)
+        else:
+            print("ERROR:", contenido)
+
         print("\nOpciones:")
         print("1. Registrar compra")
         print("2. Volver al menú")
@@ -371,6 +414,14 @@ def registro_ventas():
     prefijo = b"serv2"
     try:
         while True:
+            mensaje = b"serv6" + b"fun0"
+            contenido = com_bus(mensaje)
+
+            productos = ast.literal_eval(contenido)
+            print("\nLista de productos:")
+            for p in productos:
+                codigo, nombre, stock, precio = p
+                print(f"Código: {codigo:<10} | Nombre: {nombre:<15} | Stock: {stock:<5} | Precio: ${precio}")
             print("\nOpciones:")
             print("1. Registrar venta")
             print("2. Volver al menú")
@@ -421,11 +472,15 @@ def gestion_trabajadores():
             cuerpo = contenido[2:]
             try:
                 lista = json.loads(cuerpo)
-                print("\nRUT     │ Nombre      │ Apellido    │ Correo               │ Rol")
-                print("─────────┼──────────────┼─────────────┼──────────────────────┼─────")
+                # Imprimir encabezado
+                print("+--------------+--------------+--------------+--------------------------+")
+                print("| RUT          | Nombre       | Apellido     | Correo                   |")
+                print("+--------------+--------------+--------------+--------------------------+")
+
                 for t in lista:
-                    print(f"{t['rut']} ┃ {t['nombre']:<12} ┃ {t['apellido']:<11} ┃ "
-                          f"{t['correo']:<20} ┃ {t['rol']}")
+                    print(f"| {t['rut']:<12} | {t['nombre']:<12} | {t['apellido']:<12} | {t['correo']:<24} |")
+
+                print("+--------------+--------------+--------------+--------------------------+")
             except json.JSONDecodeError:
                 print("Error al decodificar JSON:", cuerpo)
         else:
@@ -455,7 +510,7 @@ def gestion_trabajadores():
                 payload = contenido[2:]
                 try:
                     info = json.loads(payload)
-                    print(f"Trabajador agregado. rut: {info['rut']}, Contraseña: {info['contrasena']}")
+                    print(f"Trabajador agregado.")
                 except json.JSONDecodeError:
                     print("Respuesta inesperada al agregar:", payload)
             else:

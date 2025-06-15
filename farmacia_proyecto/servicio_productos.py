@@ -133,7 +133,7 @@ def main():
                 chunk = sock.recv(amount_expected - amount_received)
                 amount_received += len(chunk)
                 data += chunk
-            print(f"Mensaje recibido: {data}")
+            #print(f"Mensaje recibido: {data}")
 
             if sinit == 1:
                 sinit = 0

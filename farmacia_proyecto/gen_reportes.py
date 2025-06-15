@@ -90,10 +90,10 @@ def generar_reporte(mes_anio: str):
         return "OK", reporte
 
     except psycopg2.Error as e:
-        print(f"Error de base de datos: {e}")
+        #print(f"Error de base de datos: {e}")
         return "NK", "Error interno en la base de datos."
     except Exception as e:
-        print(f"Error inesperado: {e}")
+        #print(f"Error inesperado: {e}")
         return "NK", str(e)
     finally:
         if conn:
@@ -139,7 +139,7 @@ def main():
 
             #Procesar el payload recibido
             payload = data.decode()
-            print(f"Mensaje recibido: {payload}")
+            #print(f"Mensaje recibido: {payload}")
 
             if payload.startswith("serv4"):
                 command = payload[5:] if payload[5] != ' ' else payload[6:]
@@ -151,7 +151,7 @@ def main():
                     response_data = "NK" + str(reporte_data)
                 
                 response = format_response(SERVICE_NAME, status, response_data)
-                print(f"Enviando respuesta: {response}")
+                #print(f"Enviando respuesta: {response}")
                 sock.sendall(response.encode())
         
     except Exception as e:
