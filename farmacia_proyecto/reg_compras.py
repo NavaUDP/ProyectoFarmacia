@@ -65,36 +65,29 @@ def process_purchase(payload: str):
             total_compra_bruto += item['cantidad'] * precio_compra
             productos_info[item['codigo']] = {'precio_compra': precio_compra}
 
-            #Actualizar el stock de producto
-            for item in items_to_buy:
-                cursor.execute(
-                    "UPDATE producto SET stock = stock + %s WHERE codigo_producto = %s",
-                    (item['cantidad'], item['codigo'])
-                )
+        #Registrar en la tabla de compras
+        id_compra = uuid.uuid4()
+        cursor.execute(
+             """
+            INSERT INTO compra (id_compra, fecha, total_compra)
+            VALUES (%s, %s, %s)
+            """,
+            (str(id_compra), datetime.now(), total_compra_bruto)
+        )
 
-            #Registrar en la tabla de compras
-            id_compra = uuid.uuid4()
+        #Insertar en detalle compra
+        for item in items_to_buy:
+            id_detalle = uuid.uuid4()
             cursor.execute(
                 """
-                INSERT INTO compra (id_compra, fecha, total_compra)
-                VALUES (%s, %s, %s)
+                INSERT INTO detalle_compra (id_detalle, id_compra, id_producto_proveedor, cantidad, precio_unitario)
+                VALUES (%s, %s, (SELECT id_producto_proveedor FROM producto_proveedor WHERE rut_proveedor = %s AND codigo_producto = %s), %s, %s)
                 """,
-                (str(id_compra), datetime.now(), total_compra_bruto)
-            )
-
-            #Insertar en detalle compra
-            for item in items_to_buy:
-                id_detalle = uuid.uuid4()
-                cursor.execute(
-                    """
-                    INSERT INTO detalle_compra (id_detalle, id_compra, id_producto_proveedor, cantidad, precio_unitario)
-                    VALUES (%s, %s, (SELECT id_producto_proveedor FROM producto_proveedor WHERE rut_proveedor = %s AND codigo_producto = %s), %s, %s)
-                    """,
-                    (str(id_detalle), str(id_compra), rut_proveedor, item['codigo'], item['cantidad'], productos_info[item['codigo']]['precio_compra'])
-                )       
-            #Finalizar transacción
-            conn.commit()
-            return "OK", f"Compra registrada exitosamente. ID de compra: {id_compra}."
+                (str(id_detalle), str(id_compra), rut_proveedor, item['codigo'], item['cantidad'], productos_info[item['codigo']]['precio_compra'])
+            )       
+        #Finalizar transacción
+        conn.commit()
+        return "OK", f"Compra registrada exitosamente. ID de compra: {id_compra}."
 
     except psycopg2.Error as e:
         if conn:
@@ -102,7 +95,7 @@ def process_purchase(payload: str):
         #print(f"Error de base de datos: {e}")
         return "NK", "Error interno en la base de datos."
     except (ValueError, IndexError, KeyError) as e:
-        #print(f"Error en el formato del payload: {e}")
+        print(f"Error en el formato del payload: {e}")
         return "NK", "Formato de payload incorrecto."
     finally:
         if conn:

@@ -284,8 +284,8 @@ def generacion_reportes():
     prefijo = service_name.encode('utf-8')
 
     while True:
-        print("\n--- Generación de Reportes ---")
-        print("1. Generar reporte por mes")
+        print("\nOpciones:")
+        print("1. Generar reporte")
         print("2. Volver al menú")
 
         opcion = input("Seleccione una opción: ")
@@ -293,7 +293,7 @@ def generacion_reportes():
             print("Volviendo al menú...\n")
             break
         elif opcion == "1":
-            fecha_reporte = input("Ingrese el mes y año del reporte (formato AAAA-MM): ")
+            fecha_reporte = input("Ingrese el año y mes del reporte (formato AAAA-MM): ")
             # Validar formato simple (puede mejorarse con regex o datetime)
             if len(fecha_reporte) != 7 or fecha_reporte[4] != '-':
                 print("Formato inválido. Use AAAA-MM.")
@@ -339,30 +339,16 @@ def registro_compras():
             cuerpo = contenido[2:]
             try:
                 lista = json.loads(cuerpo)
-                productos_map: dict[str, list[dict]] = {}
-
-                for prov in lista:
-                    rut = prov["rut"]
-                    nombre_prov = prov["nombre"]
-                    for prod in prov["productos"]:
-                        codigo = prod["codigo_producto"]
-                        nombre_prod = prod["nombre_producto"]
-                        precio = prod["precio_compra"]
-
-                        productos_map.setdefault(codigo, []).append({
-                            "nombre_producto": nombre_prod,
-                            "rut_proveedor": rut,
-                            "nombre_proveedor": nombre_prov,
-                            "precio_compra": precio
-                        })  
-                print("-" * 70)
-                for codigo, provs in productos_map.items():
-                    nombre_prod = provs[0]["nombre_producto"]
-                    print(f"{nombre_prod} (Código: {codigo})")
-                    print("Proveedores asociados:")
-                    for p in provs:
-                        print(f"   • {p['nombre_proveedor']} (RUT: {p['rut_proveedor']}) | Precio compra: ${p['precio_compra']}")
-                    print("-" * 70)
+                print("-" * 80) 
+                for proveedor in lista:
+                    print(f"Proveedor: {proveedor['nombre']} (RUT: {proveedor['rut']})")
+                    print(f"Correo: {proveedor['correo']}")
+                    print("Productos asociados:")
+                    for producto in proveedor['productos']:
+                        print(f"  - Código: {producto['codigo_producto']:<10} | "
+                            f"Nombre: {producto['nombre_producto']:<20} | "
+                            f"Precio Compra: ${producto['precio_compra']}")
+                    print("-" * 80)
             except json.JSONDecodeError:
                 print("Error al parsear lista:", cuerpo)
         else:
@@ -378,11 +364,6 @@ def registro_compras():
             break
         elif opcion == "1":
             # Ejecuta el servicio de registro de compras
-            rut_trabajador = input("Ingrese su RUT (8 dígitos): ")
-            if len(rut_trabajador) != 8 or not rut_trabajador.isdigit():
-                print("RUT inválido. Debe tener 8 dígitos.")
-                continue
-
             rut_proveedor = input("Ingrese el RUT del proveedor (8 dígitos): ")
             if len(rut_proveedor) != 8 or not rut_proveedor.isdigit():
                 print("RUT inválido. Debe tener 8 dígitos.")
@@ -570,6 +551,7 @@ def mostrar_menu():
 def main():
     limpiar_consola()
     prefijo = b"serv0"
+    global rut_trabajador
     try:
         while True:
             print("1. Iniciar Sesión")

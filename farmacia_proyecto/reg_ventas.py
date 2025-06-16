@@ -144,7 +144,7 @@ def process_sale(payload: str):
     except psycopg2.Error as e:
         if conn:
             conn.rollback()
-        #print(f"Error de base de datos: {e}")
+        print(f"Error de base de datos: {e}")
         return "NK", "Error interno en la base de datos."
     except (ValueError, IndexError, KeyError) as e:
         #print(f"Error en el formato del payload: {e}")
