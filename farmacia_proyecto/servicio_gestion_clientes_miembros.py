@@ -49,8 +49,14 @@ class MiembroServiceDB:
             raise ValueError("RUT inválido")
         with self.conn.cursor() as cur:
             cur.execute("""
+                UPDATE venta
+                SET rut_miembro = NULL
+                WHERE rut_miembro = %s
+            """, (rut,))
+            
+            cur.execute("""
                 DELETE FROM miembro
-                 WHERE rut_miembro = %s
+                WHERE rut_miembro = %s
             """, (rut,))
             if cur.rowcount == 0:
                 raise ValueError(f"No existe un miembro con RUT '{rut}'.")

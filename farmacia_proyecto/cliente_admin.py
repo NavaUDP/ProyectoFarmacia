@@ -67,6 +67,7 @@ def gestion_clientes_miembros():
         opcion = input("Seleccione una opción: ")
 
         if opcion == "3":
+            limpiar_consola()
             print("Volviendo al menú...\n")
             break
 
@@ -79,8 +80,10 @@ def gestion_clientes_miembros():
             datos   = f"ADD|{rut}|{nombre}|{apellido}|{correo}".encode()
             contenido = com_bus(prefijo + datos)   # e.g. "OK" or "NK..."
             if contenido.startswith("OK"):
+                limpiar_consola()
                 print("Cliente miembro agregado correctamente.")
             else:
+                limpiar_consola()
                 print("Error al agregar:", contenido[2:] if contenido.startswith("NK") else contenido)
 
         # 2) ELIMINAR
@@ -89,11 +92,14 @@ def gestion_clientes_miembros():
             datos   = f"DEL|{rut}".encode()
             contenido = com_bus(prefijo + datos)   # e.g. "OK" or "NK..."
             if contenido.startswith("OK"):
+                limpiar_consola()
                 print("Cliente miembro eliminado correctamente.")
             else:
+                limpiar_consola()
                 print("Error al eliminar:", contenido[2:] if contenido.startswith("NK") else contenido)
 
         else:
+            limpiar_consola()
             print("Opción no válida.")
 
 def gestion_proveedores():
@@ -130,6 +136,8 @@ def gestion_proveedores():
         opcion = input("Seleccione una opción: ")
 
         if opcion == "6":
+            limpiar_consola()
+            print("Volviendo al menú...\n")
             break
 
         # 1) AGREGAR PROVEEDOR
@@ -140,8 +148,10 @@ def gestion_proveedores():
             datos    = f"ADD|{rut}|{nom}|{mail}".encode()
             contenido = com_bus(prefijo + datos)  # puede llegar "OK", "OKOK", "NK…", etc.
             if contenido.startswith("OK"):
+                limpiar_consola()
                 print("Proveedor agregado correctamente.")
             else:
+                limpiar_consola()
                 print("Error al agregar:", contenido[2:] if contenido.startswith("NK") else contenido)
 
         # 2) ELIMINAR PROVEEDOR
@@ -150,8 +160,10 @@ def gestion_proveedores():
             datos = f"DEL|{rut}".encode()
             contenido = com_bus(prefijo + datos)
             if contenido.startswith("OK"):
+                limpiar_consola()
                 print("Proveedor eliminado correctamente.")
             else:
+                limpiar_consola()
                 print("Error al eliminar:", contenido[2:] if contenido.startswith("NK") else contenido)
 
         # 3) AGREGAR PRODUCTO A PROVEEDOR
@@ -162,8 +174,10 @@ def gestion_proveedores():
             datos = f"APROD|{rut}|{prod}|{precio}".encode()
             contenido = com_bus(prefijo + datos)
             if contenido.startswith("OK"):
+                limpiar_consola()
                 print("Producto asociado correctamente.")
             else:
+                limpiar_consola()
                 print("Error al asociar producto:", contenido[2:] if contenido.startswith("NK") else contenido)
         elif opcion == "4":
             rut    = input("RUT del proveedor: ")
@@ -171,8 +185,10 @@ def gestion_proveedores():
             datos = f"DPROD|{rut}|{prod}".encode()
             contenido = com_bus(prefijo + datos)
             if contenido.startswith("OK"):
+                limpiar_consola()
                 print("Asociación de producto eliminada correctamente.")
             else:
+                limpiar_consola()
                 print("Error al eliminar asociación:", contenido[2:] if contenido.startswith("NK") else contenido)
         elif opcion == "5":
             rut    = input("RUT del proveedor: ")
@@ -181,10 +197,13 @@ def gestion_proveedores():
             datos = f"MODIF|{rut}|{prod}|{precio}".encode()
             contenido = com_bus(prefijo + datos)
             if contenido.startswith("OK"):
+                limpiar_consola()
                 print("Precio modificado correctamente.")
             else:
+                limpiar_consola()
                 print("Error al modificar precio", contenido[2:] if contenido.startswith("NK") else contenido)
         else:
+            limpiar_consola()
             print("Opción no válida.")
 
 def gestion_productos():
@@ -207,6 +226,7 @@ def gestion_productos():
 
         opcion = input("Seleccione una opción: ")
         if opcion == "4":
+            limpiar_consola()
             print("Volviendo al menú...\n")
             break
         elif opcion == "1":
@@ -219,8 +239,10 @@ def gestion_productos():
             
             contenido = com_bus(mensaje)
             if contenido == "VALID":
+                limpiar_consola()
                 print("Agregación de producto exitosa.")
             else:
+                limpiar_consola()
                 print("Agregación de producto fallida.")
         elif opcion == "2":
             codigo = input("Código del prodcuto: ")
@@ -229,8 +251,10 @@ def gestion_productos():
             
             contenido = com_bus(mensaje)
             if contenido == "VALID":
+                limpiar_consola()
                 print("Eliminación de producto exitosa.")
             else:
+                limpiar_consola()
                 print("Eliminación de producto fallida.")
         elif opcion == "3":
             codigo = input("Código del prodcuto: ")
@@ -240,10 +264,13 @@ def gestion_productos():
             
             contenido = com_bus(mensaje)
             if contenido == "VALID":
+                limpiar_consola()
                 print("Modificación de precio exitosa.")
             else:
+                limpiar_consola()
                 print("Modificación de precio fallida.")
         else:
+            limpiar_consola()
             print("Opción no válida.") 
 
 def gestion_inventario():
@@ -264,6 +291,7 @@ def gestion_inventario():
 
         opcion = input("Seleccione una opción: ")
         if opcion == "2":
+            limpiar_consola()
             print("Volviendo al menú...\n")
             break
         elif opcion == "1":
@@ -273,10 +301,13 @@ def gestion_inventario():
             mensaje = prefijo + datos
             contenido = com_bus(mensaje)
             if contenido == "VALID":
+                limpiar_consola()
                 print("Cambio de stock válido.")
             else:
+                limpiar_consola()
                 print("Cambio de stock inválido.")
         else:
+            limpiar_consola()
             print("Opción no válida.") 
 
 def generacion_reportes():
@@ -290,12 +321,14 @@ def generacion_reportes():
 
         opcion = input("Seleccione una opción: ")
         if opcion == "2":
+            limpiar_consola()
             print("Volviendo al menú...\n")
             break
         elif opcion == "1":
             fecha_reporte = input("Ingrese el año y mes del reporte (formato AAAA-MM): ")
             # Validar formato simple (puede mejorarse con regex o datetime)
             if len(fecha_reporte) != 7 or fecha_reporte[4] != '-':
+                limpiar_consola()
                 print("Formato inválido. Use AAAA-MM.")
                 continue
 
@@ -306,6 +339,7 @@ def generacion_reportes():
                 cuerpo_json = contenido[2:]
                 try:
                     reporte = json.loads(cuerpo_json)
+                    limpiar_consola()
                     print("\n--- Reporte para el período", fecha_reporte, "---")
                     print("\n[ VENTAS ]")
                     print(f"  - Monto Total Vendido: ${reporte.get('ventas_monto_total', 0):,}".replace(",", "."))
@@ -322,12 +356,15 @@ def generacion_reportes():
                     print("-----------------------------------------\n")
 
                 except json.JSONDecodeError:
+                    limpiar_consola()
                     print("Error: La respuesta del servidor no es un JSON válido:", cuerpo_json)
             else:
                 # Si la respuesta es NK<error> u otra cosa
                 error_msg = contenido[2:] if contenido.startswith("NK") else contenido
+                limpiar_consola()
                 print("Error al generar el reporte:", error_msg)
         else:
+            limpiar_consola()
             print("Opción no válida.")
 
 def registro_compras():
@@ -350,8 +387,10 @@ def registro_compras():
                             f"Precio Compra: ${producto['precio_compra']}")
                     print("-" * 80)
             except json.JSONDecodeError:
+                limpiar_consola()
                 print("Error al parsear lista:", cuerpo)
         else:
+            limpiar_consola()
             print("ERROR:", contenido)
 
         print("\nOpciones:")
@@ -360,12 +399,14 @@ def registro_compras():
 
         opcion = input("Seleccione una opción: ")
         if opcion == "2":
+            limpiar_consola()
             print("Volviendo al menú...\n")
             break
         elif opcion == "1":
             # Ejecuta el servicio de registro de compras
             rut_proveedor = input("Ingrese el RUT del proveedor (8 dígitos): ")
             if len(rut_proveedor) != 8 or not rut_proveedor.isdigit():
+                limpiar_consola()
                 print("RUT inválido. Debe tener 8 dígitos.")
                 continue
 
@@ -377,6 +418,7 @@ def registro_compras():
                 cantidad = input(f"Ingrese la cantidad de {codigo_producto}: ")
                 productos.append(f"{codigo_producto},{cantidad}")
             if not productos:
+                limpiar_consola()
                 print("Debe ingresar al menos un producto.")
                 continue
             datos_compra = f"{rut_trabajador};{rut_proveedor};" + ";".join(productos)
@@ -384,11 +426,14 @@ def registro_compras():
 
             contenido = com_bus(payload)  
             if contenido.startswith("OK"):
+                limpiar_consola()
                 print("Compra registrada correctamente.")
             else:
+                limpiar_consola()
                 print("Error al registrar la compra:", contenido[2:] if contenido.startswith("NK") else contenido)
 
         else:
+            limpiar_consola()
             print("Opción no válida.") 
 
 def registro_ventas():
@@ -409,6 +454,7 @@ def registro_ventas():
 
             opcion = input("Seleccione una opción: ")
             if opcion == "2":
+                limpiar_consola()
                 print("Volviendo al menú...\n")
                 break
             elif opcion == "1":
@@ -428,6 +474,7 @@ def registro_ventas():
                     cantidad = input(f"Ingrese la cantidad de {codigo_producto}: ")
                     productos.append(f"{codigo_producto},{cantidad}")
                 if not productos:
+                    limpiar_consola()
                     print("Debe ingresar al menos un producto.")
                     continue
                 datos_venta = f"{rut_cliente};{puntos};{rut_trabajador};" + ";".join(productos)
@@ -435,13 +482,17 @@ def registro_ventas():
 
                 contenido = com_bus(payload)  # e.g. "OK" or "NK<error>"
                 if contenido.startswith("OK"):
+                    limpiar_consola()
                     print("Venta registrada correctamente.")
                 else:
+                    limpiar_consola()
                     print("Error al registrar la venta:", contenido[2:] if contenido.startswith("NK") else contenido)
 
             else:
+                limpiar_consola()
                 print("Opción no válida.") 
     except Exception as e:
+        limpiar_consola()
         print(f"Error en registro de ventas: {e}")
 
 def gestion_trabajadores():
@@ -463,9 +514,11 @@ def gestion_trabajadores():
 
                 print("+--------------+--------------+--------------+--------------------------+")
             except json.JSONDecodeError:
+                limpiar_consola()
                 print("Error al decodificar JSON:", cuerpo)
         else:
             # si llegó NK o algo inesperado
+            limpiar_consola()
             print("Error al listar:", contenido[2:] if contenido.startswith("NK") else contenido)
 
         print("\nGestión de Trabajadores:")
@@ -475,6 +528,7 @@ def gestion_trabajadores():
         opcion = input("Seleccione una opción: ")
 
         if opcion == "3":
+            limpiar_consola()
             print("Volviendo al menú...\n")
             break
 
@@ -491,10 +545,13 @@ def gestion_trabajadores():
                 payload = contenido[2:]
                 try:
                     info = json.loads(payload)
+                    limpiar_consola()
                     print(f"Trabajador agregado.")
                 except json.JSONDecodeError:
+                    limpiar_consola()
                     print("Respuesta inesperada al agregar:", payload)
             else:
+                limpiar_consola()
                 print("Error al agregar:", contenido[2:] if contenido.startswith("NK") else contenido)
 
         # 2) ELIMINAR
@@ -504,12 +561,14 @@ def gestion_trabajadores():
             mensaje = prefijo + datos
             contenido = com_bus(mensaje)      
             if contenido.startswith("OK"):
+                limpiar_consola()
                 print("Trabajador eliminado correctamente.")
             else:
-
+                limpiar_consola()
                 print("Error al eliminar:", contenido[2:] if contenido.startswith("NK") else contenido)
 
         else:
+            limpiar_consola()
             print("Opción no válida.")
 
 def mostrar_menu():
@@ -527,25 +586,35 @@ def mostrar_menu():
 
         opcion = input("Seleccione una opción: ")
         if opcion == "9":
+            limpiar_consola()
             print("Volviendo a inicio de sesión...\n")
             break
         elif opcion == "1" :
+            limpiar_consola()
             gestion_trabajadores()
         elif opcion == "2":
+            limpiar_consola()
             registro_ventas()
         elif opcion == "3":
+            limpiar_consola()
             registro_compras()
         elif opcion == "4":
+            limpiar_consola()
             generacion_reportes()
         elif opcion == "5":
+            limpiar_consola()
             gestion_inventario()
         elif opcion == "6":
+            limpiar_consola()
             gestion_productos()
         elif opcion == "7":
+            limpiar_consola()
             gestion_proveedores()
         elif opcion == "8":
+            limpiar_consola()
             gestion_clientes_miembros()
         else:
+            limpiar_consola()
             print("Opción no válida.")
      
 def main():
@@ -554,32 +623,37 @@ def main():
     global rut_trabajador
     try:
         while True:
-            print("1. Iniciar Sesión")
-            print("2. Salir del sistema")
+            try:
+                print("\n1. Iniciar Sesión")
+                print("2. Salir del sistema")
 
-            opcion = input("Seleccione una opción: ")
-            if opcion == "1":
-                usuario = input("RUT: ")
-                password = input("Password: ")
-                
-                credenciales = f"{usuario}|{password}|True".encode()
-                mensaje = prefijo + credenciales
-                
-                contenido = com_bus(mensaje)
-                if contenido == "VALID":
-                    print("Inicio de sesión válido.")
-                    rut_trabajador = usuario
-                    mostrar_menu()
+                opcion = input("Seleccione una opción: ")
+                if opcion == "1":
+                    usuario = input("RUT: ")
+                    password = input("Password: ")
+                    
+                    credenciales = f"{usuario}|{password}|True".encode()
+                    mensaje = prefijo + credenciales
+                    
+                    contenido = com_bus(mensaje)
+                    if contenido == "VALID":
+                        limpiar_consola()
+                        print("Inicio de sesión válido.")
+                        rut_trabajador = usuario
+                        mostrar_menu()
+                    else:
+                        limpiar_consola()
+                        print("Inicio de sesión inválido.")
+                elif opcion == "2":
+                    limpiar_consola()
+                    print("Saliendo del sistema.")
+                    sys.exit()
                 else:
-                    #limpiar_consola()
-                    print("Inicio de sesión inválido.")
-            elif opcion == "2":
-                print("Saliendo del sistema.")
-                sys.exit()
-            else:
-                print("Opción no válida.")
-    except Exception as e:
-        print(f"Error en cliente: {e}")
+                    limpiar_consola()
+                    print("Opción no válida.")
+            except Exception as e:
+                limpiar_consola()
+                print(f"Error en cliente.")
     finally:
         sock.close()
         print("Cliente desconectado.")

@@ -77,9 +77,17 @@ class ProveedorServiceDB:
         if len(rut) != 8 or not rut.isdigit():
             raise ValueError("RUT inválido")
         with self.conn.cursor() as cur:
+            # Reasignar las relaciones producto-proveedor al proveedor genérico
+            cur.execute("""
+                UPDATE producto_proveedor
+                SET rut_proveedor = NULL
+                WHERE rut_proveedor = %s;
+            """, (rut,))
+
+            # Eliminar al proveedor original
             cur.execute("""
                 DELETE FROM proveedor
-                 WHERE rut_proveedor = %s
+                WHERE rut_proveedor = %s;
             """, (rut,))
             if cur.rowcount == 0:
                 raise ValueError(f"No existe un proveedor con RUT '{rut}'.")

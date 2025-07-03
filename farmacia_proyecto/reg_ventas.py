@@ -48,6 +48,9 @@ def process_sale(payload: str):
             code, qty_str = item.split(',')
             items_to_sell.append({'codigo': code, 'cantidad': int(qty_str)})
 
+        if not rut_miembro and puntos_usados > 0:
+            return "NK", "No se pueden usar puntos sin un miembro asociado."
+
         # Conectar a la base de datos
         conn = psycopg2.connect(
             dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, host=DB_HOST, port=DB_PORT

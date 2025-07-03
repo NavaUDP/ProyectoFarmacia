@@ -72,9 +72,17 @@ class TrabajadorServiceDB:
         if len(rut) != 8 or not rut.isdigit():
             raise ValueError("RUT inválido")
         with self.conn.cursor() as cur:
+            # Reasignar las ventas al trabajador genérico
+            cur.execute("""
+                UPDATE venta
+                SET rut_trabajador = NULL
+                WHERE rut_trabajador = %s;
+            """, (rut,))
+
+            # Eliminar al trabajador original
             cur.execute("""
                 DELETE FROM trabajador
-                  WHERE rut_trabajador = %s
+                WHERE rut_trabajador = %s;
             """, (rut,))
             if cur.rowcount == 0:
                 raise ValueError(f"No existe trabajador con RUT '{rut}'.")

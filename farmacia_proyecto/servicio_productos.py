@@ -42,8 +42,25 @@ def eliminar_producto(payload):
             host="localhost"
         )
         cursor = conn.cursor()
-        query = "DELETE FROM producto WHERE codigo_producto = %s;"
-        cursor.execute(query, (codigo,))
+
+        # 2. Reasignar referencias al producto genérico
+        cursor.execute("""
+            UPDATE detalle_venta
+            SET codigo_producto = NULL
+            WHERE codigo_producto = %s;
+        """, (codigo,))
+
+        cursor.execute("""
+            UPDATE producto_proveedor
+            SET codigo_producto = NULL
+            WHERE codigo_producto = %s;
+        """, (codigo,))
+
+        # 3. Eliminar el producto original
+        cursor.execute("""
+            DELETE FROM producto
+            WHERE codigo_producto = %s;
+        """, (codigo,))
         conn.commit()
 
         if cursor.rowcount == 1:
@@ -99,7 +116,7 @@ def listar_productos():
         )
         cursor = conn.cursor()
         
-        query = "SELECT * FROM producto;"
+        query = "SELECT * FROM producto WHERE codigo_producto != 'PROD0000' ORDER BY codigo_producto;"
         cursor.execute(query)
         
         productos = cursor.fetchall()
