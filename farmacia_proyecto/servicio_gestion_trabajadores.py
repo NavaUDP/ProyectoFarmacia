@@ -69,6 +69,9 @@ class TrabajadorServiceDB:
         return {"rut": rut}
 
     def eliminar(self, rut):
+        if rut == "12345678":
+            raise ValueError("No se puede eliminar al usuario administrador.")
+        
         if len(rut) != 8 or not rut.isdigit():
             raise ValueError("RUT inválido")
         with self.conn.cursor() as cur:
